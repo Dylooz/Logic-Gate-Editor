@@ -41,6 +41,7 @@ class Link {
 
 	severLink() {
 		//Delete output link
+		//bro lol
 		for (i=0;i<this.start.out.length;i++) {
 			if (this.start.out[i].start == this.start && this.start.out[i].end == this.end && this.inputnum == this.start.out[i].inputnum) {
 				this.start.out.splice(i,1);
