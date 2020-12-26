@@ -1,10 +1,14 @@
-let logicGateTypes = ["AND","OR","NOT","XOR"];
-let logicGates = [];
-let links = [];
-let startButtons = [];
-let outputs = [];
+const logicGateTypes = ["AND","OR","NOT","XOR"];
+const logicGateAddition = [...logicGateTypes, "INPUT", "OUPTUT"];
+const logicGates = [];
+const links = [];
+const startButtons = [];
+const outputs = [];
 let click = true;
 let keyToggle = true;
+let mode = 0 // standard
+let noCustom = true;
+let customGate;
 
 let barTop;
 let barHeight;
@@ -21,93 +25,147 @@ function draw() {
 	let screenHeight = barTop;
 	background(82,82,82);
 
-	//draw the gate selection area
-	fill(54,54,54);
-	noStroke();
-	rect(0,barTop,windowWidth,(windowHeight-barTop));
-	let sectionWidth = (windowWidth/logicGateTypes.length);
-	let sectionPadding = sectionWidth * 0.03;
-	let heightPadding = barHeight * 0.2;
-	//Draw the menu bar
-	for (i=0;i<logicGateTypes.length;i++) {
-		//Draw the rectangles and detect mouse hover events
-		fill(28,28,28);
+	let sectionWidth;
+	let sectionPadding;
+	let heightPadding;
+
+	//Standard Mode
+	if (mode === 0) {
+	
+		//draw the gate selection area
+		fill(54,54,54);
 		noStroke();
-		let x = (sectionWidth*i)+sectionPadding;
-		let y = barTop+heightPadding;
-		let w = sectionWidth-(2*sectionPadding);
-		let h = barHeight-(2*heightPadding);
+		rect(0,barTop,windowWidth,(windowHeight-barTop));
+		sectionWidth = (windowWidth/logicGateTypes.length);
+		sectionPadding = sectionWidth * 0.03;
+		heightPadding = barHeight * 0.2;
+		
+		//Draw the menu bar
+		for (i=0;i<logicGateTypes.length;i++) {
 
-		//Detect mouse over
-		if ((mouseX > x && mouseX < (x+w)) && (mouseY > y && mouseY < (y+h))) {
-			
-			fill(50,50,50);
+			//Draw the rectangles and detect mouse hover events
+			fill(28,28,28);
+			noStroke();
+			let x = (sectionWidth*i)+sectionPadding;
+			let y = barTop+heightPadding;
+			let w = sectionWidth-(2*sectionPadding);
+			let h = barHeight-(2*heightPadding);
 
-			//Detect mouse clicked
-			if (mouseIsPressed) {
-				fill(35,35,35);
+			//Detect mouse over
+			if ((mouseX > x && mouseX < (x+w)) && (mouseY > y && mouseY < (y+h))) {
+				
+				fill(50,50,50);
 
-				//Create Logic Gate
-				if (click){
-					click = false;
-					logicGates.push(new LogicGate(logicGateTypes[i], windowWidth/2, screenHeight/2));						
+				//Detect mouse clicked
+				if (mouseIsPressed) {
+					fill(35,35,35);
+
+					//Create Logic Gate
+					if (click){
+						click = false;
+						logicGates.push(new LogicGate(logicGateTypes[i], windowWidth/2, screenHeight/2));						
+					}
+
 				}
-
 			}
+
+			//Draw the rectangle
+			rect(x,y,w,h);
+			fill(255);
+			textAlign(CENTER,CENTER);
+			text(logicGateTypes[i],x+(w/2),y+(h/2));
 		}
 
-		//Draw the rectangle
-		rect(x,y,w,h);
-		fill(255);
-		textAlign(CENTER,CENTER);
-		text(logicGateTypes[i],x+(w/2),y+(h/2));
-	}
+		textAlign(LEFT, TOP);
+		textSize(20);
+		text("GATE PLAYGROUND", 3, 3);
 
-	//Draw Outputs
-	outputs.forEach((v, i) => {
-		v.x = windowWidth - v.width;
-		//Evenly distribute outputs if move mode is off
-		if (!v.move) {v.y = ((barTop/outputs.length)*i) + (((barTop/outputs.length)-v.width) / 2);}
-		v.draw();
-	});
-
-	//Draw Inputs
-	startButtons.forEach((v, i) => {
-		//Evenly distribute inputs if move mode is off
-		if (!v.move) {v.y = ((barTop/startButtons.length)*i) + (((barTop/startButtons.length)-v.height) / 2);}
-		v.draw();
-	});
-
-	//Draw Logic Gates
-	logicGates.forEach((v,i) => {
-		//Check for collision
-		if ((v.y+v.height) > barTop) {
-			v.y = barTop - v.height;
-		}
-		if (v.y < 0) {
-			v.y = 0;
-		}
-		if (v.x < 0) {
-			v.x = 0;
-		}
-		if ((v.x+v.width) > windowWidth) {
+		//Draw Outputs
+		outputs.forEach((v, i) => {
 			v.x = windowWidth - v.width;
-		}
-		v.draw();
-		v.updateState();
+			//Evenly distribute outputs if move mode is off
+			if (!v.move) {v.y = ((barTop/outputs.length)*i) + (((barTop/outputs.length)-v.width) / 2);}
+			v.draw();
+		});
 
-		//Check for mouse hover and backspace key
-		if (v.hover && keyIsPressed && keyCode == BACKSPACE && keyToggle) {
-			//Delete the links on the logic gate
-			v.removeConnections();
-			//Remove logic gate from array
-			logicGates.splice(i,1);
-			//Set key toggle
-			keyToggle = false; //key toggle makes it such that the delete process is only ran once per key press
-		} else if (!keyIsPressed && !keyToggle) {
-			keyToggle = true;
+		//Draw Inputs
+		startButtons.forEach((v, i) => {
+			//Evenly distribute inputs if move mode is off
+			if (!v.move) {v.y = ((barTop/startButtons.length)*i) + (((barTop/startButtons.length)-v.height) / 2);}
+			v.draw();
+		});
+
+		//Draw Logic Gates
+		logicGates.forEach((v,i) => {
+			//Check for collision
+			if ((v.y+v.height) > barTop) {
+				v.y = barTop - v.height;
+			}
+			if (v.y < 0) {
+				v.y = 0;
+			}
+			if (v.x < 0) {
+				v.x = 0;
+			}
+			if ((v.x+v.width) > windowWidth) {
+				v.x = windowWidth - v.width;
+			}
+			v.draw();
+			v.updateState();
+
+			//Check for mouse hover and backspace key
+			if (v.hover && keyIsPressed && keyCode == BACKSPACE && keyToggle) {
+				//Delete the links on the logic gate
+				v.removeConnections();
+				//Remove logic gate from array
+				logicGates.splice(i,1);
+				//Set key toggle
+				keyToggle = false; //key toggle makes it such that the delete process is only ran once per key press
+			} else if (!keyIsPressed && !keyToggle) {
+				keyToggle = true;
+			}
+		});
+	} else if (mode === 1) {
+		//draw the gate selection area
+		fill(54,54,54);
+		noStroke();
+		rect(0,barTop,windowWidth,(windowHeight-barTop));
+		sectionWidth = (windowWidth/logicGateAddition.length);
+		sectionPadding = sectionWidth * 0.03;
+		heightPadding = barHeight * 0.2;
+
+		textAlign(LEFT, TOP);
+		textSize(20);
+		fill(255);
+		text("GATE CREATOR", 3, 3);
+
+		for (i=0;i<logicGateAddition.length;i++) {
+			//Draw the rectangles and detect mouse hover events
+			fill(28,28,28);
+			noStroke();
+			let x = (sectionWidth*i)+sectionPadding;
+			let y = barTop+heightPadding;
+			let w = sectionWidth-(2*sectionPadding);
+			let h = barHeight-(2*heightPadding);
+
+			//Detect mouse over
+			if ((mouseX > x && mouseX < (x+w)) && (mouseY > y && mouseY < (y+h))) {
+				
+				fill(50,50,50);
+
+				//Detect mouse clicked
+				if (mouseIsPressed) {
+					
+				}
+			}
+
+			//Draw the rectangle
+			rect(x,y,w,h);
+			fill(255);
+			textAlign(CENTER,CENTER);
+			text(logicGateAddition[i],x+(w/2),y+(h/2));
 		}
-	});
+	}
 }
 
 function windowResized() {
@@ -224,12 +282,23 @@ function mouseReleased() {
 }
 
 function keyPressed() {
-	if (key == 'm') {
-		startButtons.forEach(v => {
-			v.moveMode(mouseX, mouseY);
-		});
-		outputs.forEach(v => {
-			v.moveMode(mouseX, mouseY);
-		});
+	switch (key) {
+		case "m": {
+			startButtons.forEach(v => {
+				v.moveMode(mouseX, mouseY);
+			});
+			outputs.forEach(v => {
+				v.moveMode(mouseX, mouseY);
+			});
+			break;
+		}
+		case "c": {
+			mode = +!mode;
+			if (mode == 1 && noCustom) {
+				noCustom = false;
+				customGate = new CustomGate();
+			}
+			break;
+		}
 	}
 }
