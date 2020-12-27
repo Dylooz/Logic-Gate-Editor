@@ -1,14 +1,16 @@
 const logicGateTypes = ["AND","OR","NOT","XOR"];
 const logicGateAddition = [...logicGateTypes, "INPUT", "OUPTUT"];
 const logicGates = [];
+const logicGatesCust = [];
 const links = [];
+const linksCust = [];
 const startButtons = [];
+const startButtonsCust = [];
 const outputs = [];
+const outputsCust = [];
 let click = true;
 let keyToggle = true;
 let mode = 0 // standard
-let noCustom = true;
-let customGate;
 
 let barTop;
 let barHeight;
@@ -140,6 +142,7 @@ function draw() {
 		text("GATE CREATOR", 3, 3);
 
 		for (i=0;i<logicGateAddition.length;i++) {
+
 			//Draw the rectangles and detect mouse hover events
 			fill(28,28,28);
 			noStroke();
@@ -155,7 +158,20 @@ function draw() {
 
 				//Detect mouse clicked
 				if (mouseIsPressed) {
-					
+					fill(35,35,35);
+
+					//Create Logic Gate
+					if (click){
+						click = false;	
+						if (logicGateTypes.includes(logicGateAddition[i])) {
+							logicGatesCust.push(new LogicGate(logicGateTypes[i], windowWidth/2, screenHeight/2));						
+						} else if (logicGateAddition[i] == "INPUT") {
+							startButtonsCust.push(new Input(startButtonsCust.length.toString(), windowWidth/2, screenHeight/2));
+						} else if (logicGateAddition[i] == "OUTPUT") {
+
+						}
+					}
+
 				}
 			}
 
@@ -165,6 +181,43 @@ function draw() {
 			textAlign(CENTER,CENTER);
 			text(logicGateAddition[i],x+(w/2),y+(h/2));
 		}
+
+		//Draw Outputs
+		outputsCust.forEach(v => v.draw());
+
+		//Draw Inputs
+		startButtonsCust.forEach(v => v.draw());
+
+		//Draw logic gates
+		logicGatesCust.forEach((v,i) => {
+			//Check for collision
+			if ((v.y+v.height) > barTop) {
+				v.y = barTop - v.height;
+			}
+			if (v.y < 0) {
+				v.y = 0;
+			}
+			if (v.x < 0) {
+				v.x = 0;
+			}
+			if ((v.x+v.width) > windowWidth) {
+				v.x = windowWidth - v.width;
+			}
+			v.draw();
+			v.updateState();
+
+			//Check for mouse hover and backspace key
+			if (v.hover && keyIsPressed && keyCode == BACKSPACE && keyToggle) {
+				//Delete the links on the logic gate
+				v.removeConnections();
+				//Remove logic gate from array
+				logicGatesCust.splice(i,1);
+				//Set key toggle
+				keyToggle = false; //key toggle makes it such that the delete process is only ran once per key press
+			} else if (!keyIsPressed && !keyToggle) {
+				keyToggle = true;
+			}
+		});
 	}
 }
 
@@ -173,14 +226,26 @@ function windowResized() {
 }
 
 function mousePressed() {
-	for (i=0;i<logicGates.length;i++) {
-		logicGates[i].pressed(mouseX, mouseY);
-	}
-	for (i=0;i<startButtons.length;i++) {
-		startButtons[i].pressed(mouseX, mouseY);
-	}
-	for (i=0;i<outputs.length;i++) {
-		outputs[i].pressed(mouseX, mouseY);
+	if (mode == 0) {
+		for (i=0;i<logicGates.length;i++) {
+			logicGates[i].pressed(mouseX, mouseY);
+		}
+		for (i=0;i<startButtons.length;i++) {
+			startButtons[i].pressed(mouseX, mouseY);
+		}
+		for (i=0;i<outputs.length;i++) {
+			outputs[i].pressed(mouseX, mouseY);
+		}
+	} else if (mode == 1) {
+		for (i=0;i<logicGatesCust.length;i++) {
+			logicGatesCust[i].pressed(mouseX, mouseY);
+		}
+		for (i=0;i<startButtons.length;i++) {
+			startButtons[i].pressed(mouseX, mouseY);
+		}
+		for (i=0;i<outputs.length;i++) {
+			outputs[i].pressed(mouseX, mouseY);
+		}
 	}
 }
 
@@ -294,10 +359,6 @@ function keyPressed() {
 		}
 		case "c": {
 			mode = +!mode;
-			if (mode == 1 && noCustom) {
-				noCustom = false;
-				customGate = new CustomGate();
-			}
 			break;
 		}
 	}

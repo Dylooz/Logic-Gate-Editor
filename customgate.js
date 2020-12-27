@@ -1,5 +1,5 @@
-class CustomGate {
-	constructor() {
+class CustomGate extends LogicGate {
+	constructor(desc) {
 
 	}
 }
