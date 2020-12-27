@@ -1,5 +1,5 @@
 const logicGateTypes = ["AND","OR","NOT","XOR"];
-const logicGateAddition = [...logicGateTypes, "INPUT", "OUPTUT"];
+const logicGateAddition = [...logicGateTypes, "INPUT", "OUTPUT"];
 const logicGates = [];
 const logicGatesCust = [];
 const links = [];
@@ -166,9 +166,16 @@ function draw() {
 						if (logicGateTypes.includes(logicGateAddition[i])) {
 							logicGatesCust.push(new LogicGate(logicGateTypes[i], windowWidth/2, screenHeight/2));						
 						} else if (logicGateAddition[i] == "INPUT") {
-							startButtonsCust.push(new Input(startButtonsCust.length.toString(), windowWidth/2, screenHeight/2));
+							startButtonsCust.push(new InputCust(startButtonsCust.length.toString(), 5, 0));
+							startButtonsCust.forEach((v, i, a) => {
+								v.y = (i + 1) * screenHeight / (a.length + 1);
+							})
 						} else if (logicGateAddition[i] == "OUTPUT") {
-
+							outputsCust.push(new OutputCust(outputsCust.length.toString(), 0, 0));
+							outputsCust.forEach((v, i, a) => {
+								v.x = windowWidth - (5 + v.width);
+								v.y = (i + 1) * screenHeight / (a.length + 1);
+							})
 						}
 					}
 
@@ -252,97 +259,194 @@ function mousePressed() {
 function mouseReleased() {
 	draggingObject = false;
 	click = true;
-	//Check if a link needs to be created between two logic gates and also checks for duplicates
-	for (i=0;i<logicGates.length;i++) {
-		if (logicGates[i].drawLine && logicGates[i].outputLine) {
-			for (j=0;j<logicGates.length;j++) {
-				if (i!==j){
+	if (mode == 0) {
+		//Check if a link needs to be created between two logic gates and also checks for duplicates
+		for (i=0;i<logicGates.length;i++) {
+			if (logicGates[i].drawLine && logicGates[i].outputLine) {
+				for (j=0;j<logicGates.length;j++) {
+					if (i!==j){
+						for (l=0;l<logicGates[j].inputCircleCoords.length;l++) {
+							if (dist(mouseX,mouseY,logicGates[j].inputCircleCoords[l][0],logicGates[j].inputCircleCoords[l][1]) < logicGates[j].inputDiameter) {
+								let link = new Link(logicGates[i], logicGates[j], l);
+								let duplicate = false;
+								if (logicGates[j].in[l] !== 0){
+									duplicate = true;
+								}
+								//If not a duplicate, add the connection
+								if (!duplicate) {
+									logicGates[i].out.push(link);
+									logicGates[j].in[l] = link;
+								}
+							}
+						}
+					}
+				}
+
+				//Check if a link needs to be created between a logic gate and an output and check for duplicates
+				for (j=0;j<outputs.length;j++) {
+					if (dist(mouseX,mouseY,outputs[j].inputCircleCoords[0][0],outputs[j].inputCircleCoords[0][1]) < outputs[j].inputDiameter/2) {
+						let link = new Link(logicGates[i], outputs[j], 0);
+						let duplicate = false;
+						if (outputs[j].in[0] !== 0){
+							duplicate = true;
+						}
+						//If not a duplicate, add the connection
+						if (!duplicate) {
+							logicGates[i].out.push(link);
+							outputs[j].in[0] = link;
+						}
+					}
+				}
+			}
+
+			logicGates[i].drawLine = false;
+			logicGates[i].outputLine = false;
+			logicGates[i].notPressed();
+		}
+
+		//Check if a link needs to be created between the start buttons and a logic gate and check for duplicates
+		for (i=0;i<startButtons.length;i++) {
+			if (startButtons[i].drawLine) {
+				for (j=0;j<logicGates.length;j++) {
 					for (l=0;l<logicGates[j].inputCircleCoords.length;l++) {
 						if (dist(mouseX,mouseY,logicGates[j].inputCircleCoords[l][0],logicGates[j].inputCircleCoords[l][1]) < logicGates[j].inputDiameter) {
-							let link = new Link(logicGates[i], logicGates[j], l);
+							let link = new Link(startButtons[i],logicGates[j],l);
 							let duplicate = false;
-							if (logicGates[j].in[l] !== 0){
+							if (logicGates[j].in[l] !== 0) {
 								duplicate = true;
 							}
 							//If not a duplicate, add the connection
 							if (!duplicate) {
-								logicGates[i].out.push(link);
+								startButtons[i].out.push(link);
 								logicGates[j].in[l] = link;
 							}
 						}
 					}
 				}
-			}
 
-			//Check if a link needs to be created between a logic gate and an output and check for duplicates
-			for (j=0;j<outputs.length;j++) {
-				if (dist(mouseX,mouseY,outputs[j].inputCircleCoords[0][0],outputs[j].inputCircleCoords[0][1]) < outputs[j].inputDiameter/2) {
-					let link = new Link(logicGates[i], outputs[j], 0);
-					let duplicate = false;
-					if (outputs[j].in[0] !== 0){
-						duplicate = true;
-					}
-					//If not a duplicate, add the connection
-					if (!duplicate) {
-						logicGates[i].out.push(link);
-						outputs[j].in[0] = link;
-					}
-				}
-			}
-		}
-
-		logicGates[i].drawLine = false;
-		logicGates[i].outputLine = false;
-		logicGates[i].notPressed();
-	}
-
-	//Check if a link needs to be created between the start buttons and a logic gate and check for duplicates
-	for (i=0;i<startButtons.length;i++) {
-		if (startButtons[i].drawLine) {
-			for (j=0;j<logicGates.length;j++) {
-				for (l=0;l<logicGates[j].inputCircleCoords.length;l++) {
-					if (dist(mouseX,mouseY,logicGates[j].inputCircleCoords[l][0],logicGates[j].inputCircleCoords[l][1]) < logicGates[j].inputDiameter) {
-						let link = new Link(startButtons[i],logicGates[j],l);
+				//Check if a link needs to be created between an input and an output
+				for (j=0;j<outputs.length;j++) {
+					if (dist(mouseX,mouseY,outputs[j].inputCircleCoords[0][0],outputs[j].inputCircleCoords[0][1]) < outputs[j].inputDiameter/2) {
+						let link = new Link(startButtons[i], outputs[j], 0);
 						let duplicate = false;
-						if (logicGates[j].in[l] !== 0) {
+						if (outputs[j].in[0] !== 0) {
 							duplicate = true;
 						}
 						//If not a duplicate, add the connection
 						if (!duplicate) {
 							startButtons[i].out.push(link);
-							logicGates[j].in[l] = link;
+							outputs[j].in[0] = link;
 						}
 					}
 				}
 			}
 
-			//Check if a link needs to be created between an input and an output
-			for (j=0;j<outputs.length;j++) {
-				if (dist(mouseX,mouseY,outputs[j].inputCircleCoords[0][0],outputs[j].inputCircleCoords[0][1]) < outputs[j].inputDiameter/2) {
-					let link = new Link(startButtons[i], outputs[j], 0);
-					let duplicate = false;
-					if (outputs[j].in[0] !== 0) {
-						duplicate = true;
+			//Reset the variables for the start button
+			startButtons[i].notPressed();
+			startButtons[i].click = true;
+			startButtons[i].drawLine = false;
+
+		}
+
+		for (i=0;i<outputs.length;i++) {
+			//Reset the variables for the output
+			outputs[i].notPressed();
+		}
+	} else if (mode == 1) {
+		draggingObject = false;
+		click = true;
+		//Check if a link needs to be created between two logic gates and also checks for duplicates
+		for (i=0;i<logicGatesCust.length;i++) {
+			if (logicGatesCust[i].drawLine && logicGatesCust[i].outputLine) {
+				for (j=0;j<logicGatesCust.length;j++) {
+					if (i!==j){
+						for (l=0;l<logicGatesCust[j].inputCircleCoords.length;l++) {
+							if (dist(mouseX,mouseY,logicGatesCust[j].inputCircleCoords[l][0],logicGatesCust[j].inputCircleCoords[l][1]) < logicGatesCust[j].inputDiameter) {
+								let link = new Link(logicGatesCust[i], logicGatesCust[j], l);
+								let duplicate = false;
+								if (logicGatesCust[j].in[l] !== 0){
+									duplicate = true;
+								}
+								//If not a duplicate, add the connection
+								if (!duplicate) {
+									logicGatesCust[i].out.push(link);
+									logicGatesCust[j].in[l] = link;
+								}
+							}
+						}
 					}
-					//If not a duplicate, add the connection
-					if (!duplicate) {
-						startButtons[i].out.push(link);
-						outputs[j].in[0] = link;
+				}
+
+				//Check if a link needs to be created between a logic gate and an output and check for duplicates
+				for (j=0;j<outputsCust.length;j++) {
+					if (dist(mouseX,mouseY,outputsCust[j].inputCircleCoords[0][0],outputsCust[j].inputCircleCoords[0][1]) < outputsCust[j].inputDiameter/2) {
+						let link = new Link(logicGatesCust[i], outputsCust[j], 0);
+						let duplicate = false;
+						if (outputsCust[j].in[0] !== 0){
+							duplicate = true;
+						}
+						//If not a duplicate, add the connection
+						if (!duplicate) {
+							logicGatesCust[i].out.push(link);
+							outputsCust[j].in[0] = link;
+						}
 					}
 				}
 			}
+
+			logicGatesCust[i].drawLine = false;
+			logicGatesCust[i].outputLine = false;
+			logicGatesCust[i].notPressed();
 		}
 
-		//Reset the variables for the start button
-		startButtons[i].notPressed();
-		startButtons[i].click = true;
-		startButtons[i].drawLine = false;
+		//Check if a link needs to be created between the start buttons and a logic gate and check for duplicates
+		for (i=0;i<startButtonsCust.length;i++) {
+			if (startButtonsCust[i].drawLine) {
+				for (j=0;j<logicGatesCust.length;j++) {
+					for (l=0;l<logicGatesCust[j].inputCircleCoords.length;l++) {
+						if (dist(mouseX,mouseY,logicGatesCust[j].inputCircleCoords[l][0],logicGatesCust[j].inputCircleCoords[l][1]) < logicGatesCust[j].inputDiameter) {
+							let link = new Link(startButtonsCust[i],logicGatesCust[j],l);
+							let duplicate = false;
+							if (logicGatesCust[j].in[l] !== 0) {
+								duplicate = true;
+							}
+							//If not a duplicate, add the connection
+							if (!duplicate) {
+								startButtonsCust[i].out.push(link);
+								logicGatesCust[j].in[l] = link;
+							}
+						}
+					}
+				}
 
-	}
+				//Check if a link needs to be created between an input and an output
+				for (j=0;j<outputsCust.length;j++) {
+					if (dist(mouseX,mouseY,outputsCust[j].inputCircleCoords[0][0],outputsCust[j].inputCircleCoords[0][1]) < outputsCust[j].inputDiameter/2) {
+						let link = new Link(startButtonsCust[i], outputsCust[j], 0);
+						let duplicate = false;
+						if (outputsCust[j].in[0] !== 0) {
+							duplicate = true;
+						}
+						//If not a duplicate, add the connection
+						if (!duplicate) {
+							startButtonsCust[i].out.push(link);
+							outputsCust[j].in[0] = link;
+						}
+					}
+				}
+			}
 
-	for (i=0;i<outputs.length;i++) {
-		//Reset the variables for the output
-		outputs[i].notPressed();
+			//Reset the variables for the start button
+			startButtonsCust[i].notPressed();
+			startButtonsCust[i].click = true;
+			startButtonsCust[i].drawLine = false;
+
+		}
+
+		for (i=0;i<outputsCust.length;i++) {
+			//Reset the variables for the output
+			outputsCust[i].notPressed();
+		}
 	}
 }
 
@@ -359,6 +463,24 @@ function keyPressed() {
 		}
 		case "c": {
 			mode = +!mode;
+			break;
+		}
+		case "s": {
+			if (mode == 1) {
+				// Build a gate string and save it
+				// Gate strings take the form [Output 1, Output 2, ...]
+				// Where each output is a series of operations on any number of inputs
+				// Symbols:
+				//		¬ Not
+				// 		& And
+				// 		| Or
+				//		^ Xor
+
+				const outputList = [];
+				for (let output of outputsCust) {
+					if (output.in[0].start);
+				}
+			}
 			break;
 		}
 	}

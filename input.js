@@ -130,3 +130,13 @@ class Input {
 		}
 	}
 }
+
+class InputCust extends Input {
+	constructor (text, x, y) {
+		super(text, x, y);
+	} 
+
+	moveMode() {};
+	pressed() {};
+	notPressed() {};
+}

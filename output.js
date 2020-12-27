@@ -19,7 +19,7 @@ class Output {
 		this.offsetY = 0;
 	}
 
-	draw(){
+	draw() {
 
 		//If dragging is true, move the input
 		if (this.dragging) {
@@ -71,4 +71,16 @@ class Output {
 			if (this.baseColour == 54) {this.baseColour = 65;} else {this.baseColour = 54;}
 		}
 	} 
+}
+
+class OutputCust extends Output {
+	constructor (text, x, y) {
+		super(text, x, y, 50);
+		this.x = x;
+		this.y = y;
+	} 
+
+	moveMode() {};
+	pressed() {};
+	notPressed() {};
 }
