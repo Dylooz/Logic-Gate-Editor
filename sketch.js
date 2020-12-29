@@ -10,7 +10,7 @@ const outputs = [];
 const outputsCust = [];
 let click = true;
 let keyToggle = true;
-let mode = 0 // standard
+let mode = 0; // standard
 
 let barTop;
 let barHeight;
@@ -470,18 +470,75 @@ function keyPressed() {
 				// Build a gate string and save it
 				// Gate strings take the form [Output 1, Output 2, ...]
 				// Where each output is a series of operations on any number of inputs
-				// Symbols:
-				//		¬ Not
-				// 		& And
-				// 		| Or
-				//		^ Xor
 
-				const outputList = [];
-				for (let output of outputsCust) {
-					if (output.in[0].start);
-				}
+				console.log(JSON.stringify(buildCustomGateObj()));
+				
 			}
 			break;
 		}
 	}
+}
+
+function buildCustomGateObj() {
+	
+	let outs = [];
+	for (let output of outputsCust) {
+		outs.push(recurse(output)[0]);
+	}
+	return outs;
+		/*} else if (master instanceof CustomGate) {
+
+		} else if (master instanceof LogicGate) {
+			oObj[master.name] = [];
+			depth = oObj[master.name];
+			depth.push(master.name);
+			recursHistory.push(master);
+		}
+
+		while (recursHistory.length != 0) {
+			for (let link of master.in) {
+				let input = link.start;
+				if (input instanceof CustomGate) {
+					depth.push({
+						[input.text]: []
+					});
+					depth = depth[input.text];
+					recursHistory.push(input);
+					master = input;
+				} else if (input instanceof LogicGate) {
+					depth.push({
+						[input.name]: []
+					});
+					depth = depth[input.name];
+					recursHistory.push(input);
+					master = input;
+				} else if (input instanceof InputCust) {
+					depth.push(input.text);
+				}
+				link = [];
+			}
+			master = recursHistory.pop();
+		}
+		outputList.push(oObj);
+	}
+	return outputList;*/
+}
+
+function recurse(master) {
+	
+	let res = [];
+	for (let link of master.in) {
+		let input = link.start;
+		if (input instanceof LogicGate) {
+			res.push({
+				[input.name]: recurse(input)
+			})
+		} else if (input instanceof CustomGate) {
+
+		} else if (input instanceof InputCust) {
+			res.push(input.text);
+		}
+	}
+	
+	return res; 
 }

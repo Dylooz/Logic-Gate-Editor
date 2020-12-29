@@ -1,5 +1,5 @@
 class CustomGate extends LogicGate {
-	constructor(desc) {
-
+	constructor(name, desc, x, y) {
+		
 	}
 }
