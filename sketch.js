@@ -267,7 +267,7 @@ function mouseReleased() {
 					if (i!==j){
 						for (l=0;l<logicGates[j].inputCircleCoords.length;l++) {
 							if (dist(mouseX,mouseY,logicGates[j].inputCircleCoords[l][0],logicGates[j].inputCircleCoords[l][1]) < logicGates[j].inputDiameter) {
-								let link = new Link(logicGates[i], logicGates[j], l);
+								let link = new Link(logicGates[i], logicGates[j], l, logicGates[i].connectedOut);
 								let duplicate = false;
 								if (logicGates[j].in[l] !== 0){
 									duplicate = true;
@@ -485,43 +485,12 @@ function buildCustomGateObj() {
 	for (let output of outputsCust) {
 		outs.push(recurse(output)[0]);
 	}
-	return outs;
-		/*} else if (master instanceof CustomGate) {
-
-		} else if (master instanceof LogicGate) {
-			oObj[master.name] = [];
-			depth = oObj[master.name];
-			depth.push(master.name);
-			recursHistory.push(master);
-		}
-
-		while (recursHistory.length != 0) {
-			for (let link of master.in) {
-				let input = link.start;
-				if (input instanceof CustomGate) {
-					depth.push({
-						[input.text]: []
-					});
-					depth = depth[input.text];
-					recursHistory.push(input);
-					master = input;
-				} else if (input instanceof LogicGate) {
-					depth.push({
-						[input.name]: []
-					});
-					depth = depth[input.name];
-					recursHistory.push(input);
-					master = input;
-				} else if (input instanceof InputCust) {
-					depth.push(input.text);
-				}
-				link = [];
-			}
-			master = recursHistory.pop();
-		}
-		outputList.push(oObj);
-	}
-	return outputList;*/
+	return {
+		comp: outs,
+		inputs: startButtonsCust.length,
+		outputs: outputsCust.length,
+		padding: 0.25
+	};
 }
 
 function recurse(master) {

@@ -1,9 +1,10 @@
 class Link {
 
-	constructor(start, end, inputnum){
+	constructor(start, end, inputnum, outputnum){
 		this.start = start;
 		this.end = end;
 		this.inputnum = inputnum;
+		this.outputnum = (outputnum === undefined ? 0 : outputnum); 
 
 		this.state = false;
 	}
@@ -12,8 +13,8 @@ class Link {
 		let inputCircleCoords = this.end.inputCircleCoords;
 		let outputCircleCoords = this.start.outputCircleCoords;
 
-		let x1 = outputCircleCoords[0];
-		let y1 = outputCircleCoords[1];
+		let x1 = outputCircleCoords[this.outputnum][0];
+		let y1 = outputCircleCoords[this.outputnum][1];
 		let x2 = inputCircleCoords[this.inputnum][0];
 		let y2 = inputCircleCoords[this.inputnum][1];
 

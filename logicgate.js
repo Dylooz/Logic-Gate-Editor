@@ -27,18 +27,23 @@ const gates = {
 
 class LogicGate {
 
-	constructor(type,x,y) {
-		this.gate = gates[type];
-		this.name = this.gate.name; 
-		this.inputs = this.gate.inputs;
-		this.fun = this.gate.fun;
-
+	constructor(type,x,y,desc) {
+		if (desc === undefined) {
+			this.gate = gates[type];
+			this.name = this.gate.name; 
+			this.inputs = this.gate.inputs;
+			this.fun = this.gate.fun;
+			this.padding = this.gate.padding;
+		} else {
+			this.name = type; 
+			this.inputs = desc.inputs;
+			this.padding = desc.padding;
+		}
 		this.x = x;
 		this.y = y;
 
 		this.width = 150;
 		this.height = 75;
-		this.padding = this.gate.padding;
 
 		this.dragging = false;
 		this.hover = false;
@@ -51,7 +56,7 @@ class LogicGate {
 		this.drawLine = false;
 		this.circleToDraw = 0;
 		this.inputCircleCoords = [];
-		this.outputCircleCoords = [0,0];
+		this.outputCircleCoords = [];
 		this.inputDiameter = 0;
 		this.outputDiameter = 0;
 		this.outputLine = false;
