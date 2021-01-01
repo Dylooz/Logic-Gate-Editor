@@ -362,7 +362,7 @@ function mouseReleased() {
 					if (i!==j){
 						for (l=0;l<logicGatesCust[j].inputCircleCoords.length;l++) {
 							if (dist(mouseX,mouseY,logicGatesCust[j].inputCircleCoords[l][0],logicGatesCust[j].inputCircleCoords[l][1]) < logicGatesCust[j].inputDiameter) {
-								let link = new Link(logicGatesCust[i], logicGatesCust[j], l);
+								let link = new Link(logicGatesCust[i], logicGatesCust[j], l, logicGatesCust[i].connectedOut);
 								let duplicate = false;
 								if (logicGatesCust[j].in[l] !== 0){
 									duplicate = true;
@@ -476,11 +476,6 @@ function keyPressed() {
 			}
 			break;
 		}
-		case "a": {
-			if (mode == 0) {
-				
-			}
-		}
 	}
 }
 
@@ -503,13 +498,13 @@ function recurse(master) {
 	let res = [];
 	for (let link of master.in) {
 		let input = link.start;
-		if (input instanceof LogicGate) {
+		if (input instanceof CustomGate) {
+			res.push(input.obj.comp[link.outputnum]);
+		} else if (input instanceof LogicGate) {
 			res.push({
 				op: input.name,
 				arg: recurse(input)
 			})
-		} else if (input instanceof CustomGate) {
-
 		} else if (input instanceof InputCust) {
 			res.push(+input.text);
 		}

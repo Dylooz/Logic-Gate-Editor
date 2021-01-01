@@ -3,10 +3,11 @@ class CustomGate extends LogicGate {
 	constructor(name, x, y, desc) {
 		const obj = JSON.parse(desc);
 		super(name, x, y, obj);
+		this.obj = obj;
 		this.outputs = obj.outputs;
 		this.funs = [];
 		//obj.comp is function structure
-		for (let o of obj.comp) {
+		for (let o of this.obj.comp) {
 			this.funs.push(this.buildFunction(o));
 		}
 		this.connectedOut;
