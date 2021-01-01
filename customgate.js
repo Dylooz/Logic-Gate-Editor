@@ -4,8 +4,44 @@ class CustomGate extends LogicGate {
 		const obj = JSON.parse(desc);
 		super(name, x, y, obj);
 		this.outputs = obj.outputs;
-		this.funs = []; // build list of functions (one per output)
+		this.funs = [];
+		//obj.comp is function structure
+		for (let o of obj.comp) {
+			this.funs.push(this.buildFunction(o));
+		}
 		this.connectedOut;
+	}
+
+	buildFunction(f) {
+		if (typeof f === "number") {
+			return function (a) { return a[f] };
+		} else if (typeof f === "object") {
+			switch (f.op) {
+				case "AND": {
+					let s1 = this.buildFunction(f.arg[0]);
+					let s2 = this.buildFunction(f.arg[1]);
+					return function (a) { return (!!s1(a) === true && !!s2(a) === true); };
+					break;
+				}
+				case "OR": {
+					let s1 = this.buildFunction(f.arg[0]);
+					let s2 = this.buildFunction(f.arg[1]);
+					return function (a) { return (!!s1(a) === true || !!s2(a) === true); };
+					break;
+				}
+				case "NOT": {
+					let s1 = this.buildFunction(f.arg[0]);
+					return function (a) { return !s1(a); };
+					break;
+				}
+				case "XOR": {
+					let s1 = this.buildFunction(f.arg[0]);
+					let s2 = this.buildFunction(f.arg[1]);
+					return function (a) { return (!!s1(a) !== !!s2(a)); };
+					break;
+				}
+			} 
+		}
 	}
 
 	draw() {
@@ -121,6 +157,7 @@ class CustomGate extends LogicGate {
 
 			//Draw line if necessary
 			if (this.drawLine && this.circleToDraw == i && this.circleType == 1) {
+				this.outputLine = true;
 				strokeWeight(3);
 				line(mouseX, mouseY, this.x + this.width, circlecentreY);
 			}
@@ -156,7 +193,7 @@ class CustomGate extends LogicGate {
 		//Update the state of the logic gate, only if it is fully connected
 		if (connected){
 			for (i=0;i<this.in.length;i++) {inputs.push(this.in[i].state);}
-			for (i=0;i<this.out.length;i++) {this.out[i].state = this.fun(inputs);}
+			for (i=0;i<this.out.length;i++) {this.out[i].state = this.funs[i](inputs);}
 		}
 	}
 }

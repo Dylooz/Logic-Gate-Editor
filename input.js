@@ -13,7 +13,7 @@ class Input {
 		this.state = false;
 		this.drawLine = false;
 
-		this.outputCircleCoords = [0,0];
+		this.outputCircleCoords = [[0,0]];
 		this.outputDiameter = 0;
 
 		this.buttonHover = false;
@@ -69,8 +69,8 @@ class Input {
 		let connectorX = this.x+(this.width*0.8);
 		let connectorY = this.y+(this.height/2);
 		let connectorDiameter = this.width*0.2;
-		this.outputCircleCoords[0] = connectorX;
-		this.outputCircleCoords[1] = connectorY;
+		this.outputCircleCoords[0][0] = connectorX;
+		this.outputCircleCoords[0][1] = connectorY;
 		this.outputDiameter = connectorDiameter;
 		//Check for mouse hover over connector
 		if (dist(mouseX,mouseY,connectorX,connectorY) < connectorDiameter/2 && !draggingObject) {

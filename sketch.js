@@ -500,12 +500,13 @@ function recurse(master) {
 		let input = link.start;
 		if (input instanceof LogicGate) {
 			res.push({
-				[input.name]: recurse(input)
+				op: input.name,
+				arg: recurse(input)
 			})
 		} else if (input instanceof CustomGate) {
 
 		} else if (input instanceof InputCust) {
-			res.push(input.text);
+			res.push(+input.text);
 		}
 	}
 	

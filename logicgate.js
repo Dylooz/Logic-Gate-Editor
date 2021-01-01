@@ -56,7 +56,7 @@ class LogicGate {
 		this.drawLine = false;
 		this.circleToDraw = 0;
 		this.inputCircleCoords = [];
-		this.outputCircleCoords = [];
+		this.outputCircleCoords = [[]];
 		this.inputDiameter = 0;
 		this.outputDiameter = 0;
 		this.outputLine = false;
@@ -149,10 +149,10 @@ class LogicGate {
 
 		//Draw output circle
 		this.outputDiameter = this.height - (0.7*this.height);
-		this.outputCircleCoords[0] = (this.x+this.width);
-		this.outputCircleCoords[1] = (this.y+(this.height/2));
+		this.outputCircleCoords[0][0] = (this.x+this.width);
+		this.outputCircleCoords[0][1] = (this.y+(this.height/2));
 		strokeWeight(2);
-		if (dist(mouseX,mouseY,this.outputCircleCoords[0],this.outputCircleCoords[1]) < (this.outputDiameter/2)) {
+		if (dist(mouseX,mouseY,this.outputCircleCoords[0][0],this.outputCircleCoords[0][1]) < (this.outputDiameter/2)) {
 			this.circleHover = true;
 			outputCircleColour = 100;
 			strokeWeight(4);
