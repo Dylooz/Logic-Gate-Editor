@@ -1,0 +1,1 @@
+{"comp":[{"op":"XOR","arg":[{"op":"XOR","arg":[{"op":"XOR","arg":[0,1]},2]},{"op":"OR","arg":[{"op":"AND","arg":[0,1]},{"op":"AND","arg":[{"op":"XOR","arg":[0,1]},2]}]}]}],"inputs":3,"outputs":1,"padding":0.25}
