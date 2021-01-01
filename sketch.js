@@ -476,6 +476,11 @@ function keyPressed() {
 			}
 			break;
 		}
+		case "a": {
+			if (mode == 0) {
+				
+			}
+		}
 	}
 }
 
