@@ -38,6 +38,13 @@ class Output {
 		this.inputCircleCoords[0][1] = connectorY;
 		this.inputDiameter = connectorDiameter;
 
+		//console.log(mouseX > this.x && mouseX < this.x+this.width && mouseY > this.y && mouseY < this.y+this.width && !draggingObject);
+		if (mouseX > this.x && mouseX < this.x+this.width && mouseY > this.y && mouseY < this.y+this.width && !draggingObject) {
+			this.hover = true;
+		} else {
+			this.hover = false;
+		}
+
 		fill(200);
 		if(dist(mouseX,mouseY,connectorX,connectorY) < connectorDiameter/2) {
 			fill(160);
@@ -74,10 +81,11 @@ class Output {
 }
 
 class OutputCust extends Output {
-	constructor (text, x, y) {
+	constructor (text, x, y, id) {
 		super(text, x, y, 50);
 		this.x = x;
 		this.y = y;
+		this.id = (id << 2) + 1;
 	} 
 
 	moveMode() {};

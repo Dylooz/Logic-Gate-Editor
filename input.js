@@ -16,6 +16,7 @@ class Input {
 		this.outputCircleCoords = [[0,0]];
 		this.outputDiameter = 0;
 
+		this.hover = false;
 		this.buttonHover = false;
 		this.connectorHover = false;
 		this.dragging = false;
@@ -43,6 +44,11 @@ class Input {
 		let buttonHeight = this.height*0.8;
 		fill(100);
 		//Check for mouse hover over button
+		if (mouseX > this.x && mouseX < this.x+this.width && mouseY > this.y && mouseY < this.y+this.height && !draggingObject) {
+			this.hover = true;
+		} else {
+			this.hover = false;
+		}
 		if (mouseX > buttonX && mouseX < buttonX+buttonWidth && mouseY > buttonY && mouseY < buttonY+buttonHeight && !draggingObject) {
 			this.buttonHover = true;
 			fill(80);
@@ -132,8 +138,9 @@ class Input {
 }
 
 class InputCust extends Input {
-	constructor (text, x, y) {
+	constructor (text, x, y, id) {
 		super(text, x, y);
+		this.id = (id << 2) + 0;
 	} 
 
 	moveMode() {};

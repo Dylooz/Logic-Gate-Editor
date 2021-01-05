@@ -1,11 +1,12 @@
 class CustomGate extends LogicGate {
 	
-	constructor(name, x, y, desc) {
+	constructor(x, y, desc, id) {
 		const obj = JSON.parse(desc);
-		super(name, x, y, obj);
+		super(obj.text, x, y, obj);
 		this.obj = obj;
 		this.outputs = obj.outputs;
 		this.funs = [];
+		if (id !== 0) this.id = (id << 2) + 3;
 		//obj.comp is function structure
 		for (let o of this.obj.comp) {
 			this.funs.push(this.buildFunction(o));
@@ -194,7 +195,7 @@ class CustomGate extends LogicGate {
 		//Update the state of the logic gate, only if it is fully connected
 		if (connected){
 			for (i=0;i<this.in.length;i++) {inputs.push(this.in[i].state);}
-			for (i=0;i<this.out.length;i++) {this.out[i].state = this.funs[i](inputs);}
+			for (i=0;i<this.out.length;i++) {this.out[i].state = this.funs[this.out[i].outputnum](inputs);}
 		}
 	}
 }

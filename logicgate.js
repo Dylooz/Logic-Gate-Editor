@@ -27,7 +27,7 @@ const gates = {
 
 class LogicGate {
 
-	constructor(type,x,y,desc) {
+	constructor(type,x,y,desc,id) {
 		if (desc === undefined) {
 			this.gate = gates[type];
 			this.name = this.gate.name; 
@@ -39,6 +39,7 @@ class LogicGate {
 			this.inputs = desc.inputs;
 			this.padding = desc.padding;
 		}
+		if (id !== undefined) this.id = (id << 2) + 2;
 		this.x = x;
 		this.y = y;
 

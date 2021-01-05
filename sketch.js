@@ -1,9 +1,7 @@
-const logicGateTypes = ["AND","OR","NOT","XOR"];
-const logicGateAddition = [...logicGateTypes, "INPUT", "OUTPUT"];
+const logicGateTypes = ["AND","OR","NOT","XOR","INPUT","OUTPUT"];
+const logicGateAddition = ["AND","OR","NOT","XOR","INPUT","OUTPUT"];
 const logicGates = [];
 const logicGatesCust = [];
-const links = [];
-const linksCust = [];
 const startButtons = [];
 const startButtonsCust = [];
 const outputs = [];
@@ -11,20 +9,24 @@ const outputsCust = [];
 let click = true;
 let keyToggle = true;
 let mode = 0; // standard
+let gateCount = 0;
+
+let screenHeight;
 
 let barTop;
 let barHeight;
+let idReg = 0;
 
 function setup() {
 	createCanvas(windowWidth, windowHeight);
-	startButtons.push(new Input("A", 5, windowHeight*0.3), new Input("B", 5, windowHeight*0.6));
+	startButtons.push(new Input("0", 5, windowHeight*0.3), new Input("1 ", 5, windowHeight*0.6));
 	outputs.push(new Output("Output",windowWidth-50,(windowHeight*0.9)/2,50));
 }
 
 function draw() {
 	barTop = windowHeight * 0.9;
 	barHeight = windowHeight - barTop;
-	let screenHeight = barTop;
+	screenHeight = barTop;
 	background(82,82,82);
 
 	let sectionWidth;
@@ -64,8 +66,21 @@ function draw() {
 
 					//Create Logic Gate
 					if (click){
-						click = false;
-						logicGates.push(new LogicGate(logicGateTypes[i], windowWidth/2, screenHeight/2));						
+						click = false;	
+						if (["AND", "NOT", "OR", "XOR"].includes(logicGateAddition[i])) {
+							logicGates.push(new LogicGate(logicGateTypes[i], windowWidth/2, screenHeight/2));						
+						} else if (logicGateAddition[i] == "INPUT") {
+							startButtons.push(new Input(startButtons.length.toString(), 5, 0));
+							startButtons.forEach((v, i, a) => {
+								v.y = (i + 1) * screenHeight / (a.length + 1);
+							})
+						} else if (logicGateAddition[i] == "OUTPUT") {
+							outputs.push(new Output(outputs.length.toString(), 0, 0, 50));
+							outputs.forEach((v, i, a) => {
+								v.x = windowWidth - (5 + v.width);
+								v.y = (i + 1) * screenHeight / (a.length + 1);
+							})
+						}						
 					}
 
 				}
@@ -88,13 +103,37 @@ function draw() {
 			//Evenly distribute outputs if move mode is off
 			if (!v.move) {v.y = ((barTop/outputs.length)*i) + (((barTop/outputs.length)-v.width) / 2);}
 			v.draw();
+
+			//Check for mouse hover and backspace key
+			if (v.hover && keyIsPressed && keyCode == BACKSPACE && keyToggle) {
+				//Delete the links on the logic gate
+				v.in.forEach(v => (v instanceof Link ? v.severLink() : 0));
+				//Remove output from array
+				outputs.splice(i,1);
+				//Set key toggle
+				keyToggle = false; //key toggle makes it such that the delete process is only ran once per key press
+			} else if (!keyIsPressed && !keyToggle) {
+				keyToggle = true;
+			}
 		});
 
 		//Draw Inputs
 		startButtons.forEach((v, i) => {
 			//Evenly distribute inputs if move mode is off
+			v.text = i.toString();
 			if (!v.move) {v.y = ((barTop/startButtons.length)*i) + (((barTop/startButtons.length)-v.height) / 2);}
 			v.draw();
+
+			if (v.hover && keyIsPressed && keyCode == BACKSPACE && keyToggle) {
+				//Delete the links on the logic gate
+				v.out.forEach(v => (v instanceof Link ? v.severLink() : 0));
+				//Remove output from array
+				startButtons.splice(i,1);
+				//Set key toggle
+				keyToggle = false; //key toggle makes it such that the delete process is only ran once per key press
+			} else if (!keyIsPressed && !keyToggle) {
+				keyToggle = true;
+			}
 		});
 
 		//Draw Logic Gates
@@ -163,15 +202,15 @@ function draw() {
 					//Create Logic Gate
 					if (click){
 						click = false;	
-						if (logicGateTypes.includes(logicGateAddition[i])) {
-							logicGatesCust.push(new LogicGate(logicGateTypes[i], windowWidth/2, screenHeight/2));						
+						if (["AND", "NOT", "OR", "XOR"].includes(logicGateAddition[i])) {
+							logicGatesCust.push(new LogicGate(logicGateTypes[i], windowWidth/2, screenHeight/2, undefined, idReg++));						
 						} else if (logicGateAddition[i] == "INPUT") {
-							startButtonsCust.push(new InputCust(startButtonsCust.length.toString(), 5, 0));
+							startButtonsCust.push(new InputCust(startButtonsCust.length.toString(), 5, 0, idReg++));
 							startButtonsCust.forEach((v, i, a) => {
 								v.y = (i + 1) * screenHeight / (a.length + 1);
 							})
 						} else if (logicGateAddition[i] == "OUTPUT") {
-							outputsCust.push(new OutputCust(outputsCust.length.toString(), 0, 0));
+							outputsCust.push(new OutputCust(outputsCust.length.toString(), 0, 0, idReg++));
 							outputsCust.forEach((v, i, a) => {
 								v.x = windowWidth - (5 + v.width);
 								v.y = (i + 1) * screenHeight / (a.length + 1);
@@ -190,10 +229,44 @@ function draw() {
 		}
 
 		//Draw Outputs
-		outputsCust.forEach(v => v.draw());
+		outputsCust.forEach((v, i, a) => {
+
+			v.draw()
+
+			v.x = windowWidth - (5 + v.width);
+			v.y = (i + 1) * screenHeight / (a.length + 1);
+
+			//Check for mouse hover and backspace key
+			if (v.hover && keyIsPressed && keyCode == BACKSPACE && keyToggle) {
+				//Delete the links on the logic gate
+				v.in.forEach(v => (v instanceof Link ? v.severLink() : 0));
+				//Remove output from array
+				outputsCust.splice(i,1);
+				//Set key toggle
+				keyToggle = false; //key toggle makes it such that the delete process is only ran once per key press
+			} else if (!keyIsPressed && !keyToggle) {
+				keyToggle = true;
+			}
+
+		});
 
 		//Draw Inputs
-		startButtonsCust.forEach(v => v.draw());
+		startButtonsCust.forEach((v, i, a) => {
+			v.text = i.toString();
+			v.y = (i + 1) * screenHeight / (a.length + 1);
+			v.draw();
+			//Check for mouse hover and backspace key
+			if (v.hover && keyIsPressed && keyCode == BACKSPACE && keyToggle) {
+				//Delete the links on the logic gate
+				v.out.forEach(v => (v instanceof Link ? v.severLink() : 0));
+				//Remove output from array
+				startButtonsCust.splice(i,1);
+				//Set key toggle
+				keyToggle = false; //key toggle makes it such that the delete process is only ran once per key press
+			} else if (!keyIsPressed && !keyToggle) {
+				keyToggle = true;
+			}
+		});
 
 		//Draw logic gates
 		logicGatesCust.forEach((v,i) => {
@@ -470,30 +543,57 @@ function keyPressed() {
 				// Build a gate string and save it
 				// Gate strings take the form [Output 1, Output 2, ...]
 				// Where each output is a series of operations on any number of inputs
-
-				console.log(JSON.stringify(buildCustomGateObj()));
+				alert(`Your Gate String is: ${JSON.stringify(buildCustomGateObj())}`);
+				idReg = 0;
 				
 			}
 			break;
+		}
+		case "a": {
+			addCustomGate();
 		}
 	}
 }
 
 function buildCustomGateObj() {
 	
-	let outs = [];
+	/*let outs = [];
 	for (let output of outputsCust) {
 		outs.push(recurse(output)[0]);
+	}
+
+	let name = null;
+	while (name === null) {
+		name = prompt("Name Of Gate: ");
 	}
 	return {
 		comp: outs,
 		inputs: startButtonsCust.length,
 		outputs: outputsCust.length,
+		padding: 0.25,
+		text: name
+	};*/
+
+	const gates = {};
+
+	for (let lg of logicGatesCust) {
+		gates[lg.id] = {
+			op: lg.text,
+			arg: lg.in.map(l => l.start.id)
+		}
+	}
+
+	return {
+		gates: gates,
+		comp: outputsCust.map(o => o.in[0].start.id),
+		inputs: startButtonsCust.length,
+		outputs: outputsCust.length,
 		padding: 0.25
-	};
+	}
+
 }
 
-function recurse(master) {
+/*function recurse(master) {
 	
 	let res = [];
 	for (let link of master.in) {
@@ -511,4 +611,15 @@ function recurse(master) {
 	}
 	
 	return res; 
+}*/
+
+function addCustomGate() {
+	const json = prompt("Gate String:");
+	if (json !== null) {
+		try {
+			(mode == 0 ? logicGates : logicGatesCust).push(new CustomGate(windowWidth/2, screenHeight/2, json, (mode == 0 ? undefined : idReg++)));
+		} catch {
+			alert("Invalid gate string.");
+		}
+	}
 }
