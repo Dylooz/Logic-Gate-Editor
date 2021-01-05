@@ -1,0 +1,1 @@
+{"comp":[{"op":"NOT","arg":[{"op":"OR","arg":[0,1]}]}],"inputs":2,"outputs":1,"padding":0.25,"text":"NOR"}
